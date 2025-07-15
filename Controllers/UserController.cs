@@ -18,22 +18,22 @@ public class UserController : ControllerBase
     {
         return _dapper.LoadDataSingleWithParameters<DateTime>("SELECT GETDATE()", new DynamicParameters());
     }
-    [HttpGet("GetUsers/{userId}")]
+    [HttpGet("GetUsers/{userId}/{active}")]
     public IEnumerable<User> GetUsers(int userId, bool active)
     {
-        string sql = "";
+        string sql = @"EXEC dbo.spUsers_Get";
         string stringParameters = "";
         DynamicParameters sqlParameters = new DynamicParameters();
 
         if (userId != 0)
         {
-            stringParameters += ", @UserId = UserIdParameter";
-            sqlParameters.Add("@UserIdParameter", userId, DbType.Int32);
+            stringParameters += ", @UserId = @UserId";
+            sqlParameters.Add("@UserId", userId, DbType.Int32);
         }
         if (active)
         {
-            stringParameters += ", @Active = @ActiveParameter";
-            sqlParameters.Add("@ActiveParameter", active, DbType.Boolean);
+            stringParameters += ", @Active = @Active";
+            sqlParameters.Add("@Active", active, DbType.Boolean);
         }
         if (stringParameters.Length > 0)
         {

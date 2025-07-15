@@ -1,0 +1,18 @@
+USE MyNewMusicDb;
+GO
+
+CREATE OR ALTER PROCEDURE dbo.spUsers_Get
+    @UserId INT = NULL,
+    @Active BIT = NULL
+AS
+BEGIN
+    SELECT Users.UserId,
+           Users.FirstName,
+           Users.LastName,
+           Users.Email,
+           Users.Active
+    FROM dbo.UserComplete AS Users
+    WHERE Users.UserId = ISNULL(@UserId, Users.UserId)
+      AND Users.Active = ISNULL(@Active, Users.Active);
+END
+GO
