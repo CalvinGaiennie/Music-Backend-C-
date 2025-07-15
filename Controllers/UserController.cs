@@ -6,6 +6,7 @@ using DotnetApi.Models;
 using System.Data;
 
 namespace DotnetApi.Controllers;
+[ApiController]
 public class UserController : ControllerBase
 {
     private readonly DataContextDapper _dapper;
