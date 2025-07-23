@@ -1,4 +1,4 @@
-namespace DotnetApi.Models
+namespace Music.Models
 {
     public partial class User
     //does this need to be partial?

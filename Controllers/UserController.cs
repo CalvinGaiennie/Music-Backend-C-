@@ -2,10 +2,10 @@ using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Music.Data;
-using DotnetApi.Models;
+using Music.Models;
 using System.Data;
 
-namespace DotnetApi.Controllers;
+namespace Music.Controllers;
 [ApiController]
 public class UserController : ControllerBase
 {

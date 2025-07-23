@@ -69,3 +69,4 @@
 /Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/bin/Debug/net9.0/Swashbuckle.AspNetCore.Swagger.dll
 /Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerUI.dll
+/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/bin/Debug/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll

@@ -1,4 +1,9 @@
 
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -23,6 +28,24 @@ builder.Services.AddCors(options =>
                    .AllowCredentials();
     });
 });
+
+string? tokenKeyString = builder.Configuration.GetSection("AppSettings:TokenKey").Value;
+
+SymmetricSecurityKey tokenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKeyString != null ? tokenKeyString : ""));
+
+TokenValidationParameters tokenValidationParameters = new TokenValidationParameters()
+{
+    IssuerSigningKey = tokenKey,
+    ValidateIssuer = false,
+    ValidateIssuerSigningKey = false,
+    ValidateAudience = false,
+};
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(Options =>
+    {
+        Options.TokenValidationParameters = tokenValidationParameters;
+    });
 
 var app = builder.Build();
 
