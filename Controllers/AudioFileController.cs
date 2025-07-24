@@ -20,7 +20,7 @@ namespace Music.Controllers
             _dapper = new DataContextDapper(config);
         }
 
-        [HttpGet("AudioFiles/{fileId}/{userId}/{searchParam}")]
+        [HttpGet("GetAudioFiles/{fileId}/{userId}/{searchParam}")]
         public IEnumerable<AudioFile> GetAudioFiles(int fileId = 0, int userId = 0, string searchParam = "None")
         {
             string sql = @"EXEC dbo.spAudioFile_Get";
@@ -56,12 +56,10 @@ namespace Music.Controllers
         [HttpPut("UpsertAudioFile")]
         public IActionResult UpsertAudioFile(AudioFile audioFileToUpsert)
         {
-            string sql = @"EXEC dbo.spAudioFile_Upsert
-            @UserId = UserIdParameter,
+            string sql = @"EXEC dbo.spAudioFiles_Upsert
+            @UserId = @UserIdParameter,
             @AudioFileName = @AudioFileNameParameter,
-            @AudioFileContent = @AudioFileContentParameter
-            @AudioFileId = @AudioFileIdParameter";
-            //this needs to be built out similar to the post one from course
+            @AudioFileContent = @AudioFileContentParameter";
             DynamicParameters sqlParameters = new DynamicParameters();
             sqlParameters.Add("@UserIdParameter", this.User.FindFirst("userId")?.Value, DbType.Int32);
             sqlParameters.Add("@AudioFileNameParameter", audioFileToUpsert.FileName, DbType.String);
@@ -82,7 +80,7 @@ namespace Music.Controllers
         }
 
 
-        [HttpDelete("AudioFile/{audioFileId}")]
+        [HttpDelete("DeleteAudioFile/{audioFileId}")]
         public IActionResult DeleteAudioFile(int audioFileId)
         {
             string sql = @"EXEC dbo.spAudioFile_Delete @AudioFileId = " + audioFileId.ToString() + ", @UserId = " + this.User.FindFirst("userId")?.Value;
