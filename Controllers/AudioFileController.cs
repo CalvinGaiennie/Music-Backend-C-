@@ -1,3 +1,5 @@
+using System.Data;
+using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Music.Data;
@@ -18,31 +20,72 @@ namespace Music.Controllers
             _dapper = new DataContextDapper(config);
         }
 
-        [HttpGet("AudioFiles")]
-        public IEnumerable<AudioFile> GetAudioFiles()
+        [HttpGet("AudioFiles/{fileId}/{userId}/{searchParam}")]
+        public IEnumerable<AudioFile> GetAudioFiles(int fileId = 0, int userId = 0, string searchParam = "None")
         {
-            return _dapper.LoadData<AudioFile>("SELECT * FROM AudioFiles");
+            string sql = @"EXEC dbo.spAudioFile_Get";
+            string stringParameters = "";
+            DynamicParameters sqlParameters = new DynamicParameters();
+
+            if (fileId != 0)
+            {
+                stringParameters += ", @AudioFileId = @AudioFileIdParameter";
+                sqlParameters.Add("@AudioFileIdParameter", fileId, DbType.Int32);
+            }
+
+            if (userId != 0)
+            {
+                stringParameters += ", @UserId = @UserIdParameter";
+                sqlParameters.Add("@UserIdParameter", userId, DbType.Int32);
+            }
+
+            if (searchParam != "None" && searchParam.ToLower() != "none")
+            {
+                stringParameters += ", @SearchValue = @SearchValueParameter";
+                sqlParameters.Add("@SearchValueParameter", searchParam, DbType.String);
+            }
+
+            if (stringParameters.Length > 0)
+            {
+                sql += stringParameters.Substring(1);
+            }
+
+            return _dapper.LoadDataWithParameters<AudioFile>(sql, sqlParameters);
         }
 
         [HttpPut("UpsertAudioFile")]
-        public IActionResult UpsertAudioFile(AudioFile audioFile)
+        public IActionResult UpsertAudioFile(AudioFile audioFileToUpsert)
         {
-            string sql = "";
+            string sql = @"EXEC dbo.spAudioFile_Upsert
+            @UserId = UserIdParameter,
+            @AudioFileName = @AudioFileNameParameter,
+            @AudioFileContent = @AudioFileContentParameter
+            @AudioFileId = @AudioFileIdParameter";
             //this needs to be built out similar to the post one from course
-            if (_dapper.ExecuteSql(sql))
+            DynamicParameters sqlParameters = new DynamicParameters();
+            sqlParameters.Add("@UserIdParameter", this.User.FindFirst("userId")?.Value, DbType.Int32);
+            sqlParameters.Add("@AudioFileNameParameter", audioFileToUpsert.FileName, DbType.String);
+            sqlParameters.Add("@AudioFileContentParameter", audioFileToUpsert.FileData, DbType.Binary);
+
+            if (audioFileToUpsert.AudioFileId > 0)
+            {
+                sql += ", @AudioFileId = @AudioFileIdParameter";
+                sqlParameters.Add("@AudioFileIdParameter", audioFileToUpsert.AudioFileId, DbType.Int32);
+            }
+
+            if (_dapper.ExecuteSqlWithParameters(sql, sqlParameters))
             {
                 return Ok();
             }
+
             throw new Exception("Failed to upsert audio file");
         }
+
+
         [HttpDelete("AudioFile/{audioFileId}")]
-        public IActionResult DeleteAudioFile(int postId)
+        public IActionResult DeleteAudioFile(int audioFileId)
         {
-            string sql = @"EXEC dbo.spAudioFile_Upsert @AudioFileId = " +
-                    audioFile.Id.ToString() +
-                    ", @FileName = '" + audioFile.FileName +
-                    "', @FileData = @FileData";
-            //This SP does not currently exist
+            string sql = @"EXEC dbo.spAudioFile_Delete @AudioFileId = " + audioFileId.ToString() + ", @UserId = " + this.User.FindFirst("userId")?.Value;
 
             if (_dapper.ExecuteSql(sql))
             {
