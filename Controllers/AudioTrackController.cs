@@ -85,10 +85,10 @@ namespace Music.Controllers
             sqlParameters.Add("@SongDifficultyParameter", audioTrackToUpsert.SongDifficulty, DbType.String);
             sqlParameters.Add("@SongDataParameter", audioTrackToUpsert.SongData, DbType.Binary);
 
-            if (request.AudioTrackId > 0)
+            if (audioTrackToUpsert.AudioTrackId > 0)
             {
                 sql += ", @AudioTrackId = @AudioTrackIdParameter";
-                sqlParameters.Add("@AudioTrackIdParameter", request.AudioTrackId, DbType.Int32);
+                sqlParameters.Add("@AudioTrackIdParameter", audioTrackToUpsert.AudioTrackId, DbType.Int32);
             }
 
             if (_dapper.ExecuteSqlWithParameters(sql, sqlParameters))
