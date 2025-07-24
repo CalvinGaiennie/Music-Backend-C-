@@ -53,6 +53,13 @@ namespace Music.Controllers
             return _dapper.LoadDataWithParameters<AudioFile>(sql, sqlParameters);
         }
 
+        [HttpGet("GetMyAudioFiles")]
+        public IEnumerable<AudioFile> GetMyAudioFiles()
+        {
+            string sql = @"EXEC dbo.spAudioFile_Get @UserId = " + this.User.FindFirst("userId")?.Value;
+            return _dapper.LoadData<AudioFile>(sql);
+        }
+
         [HttpPut("UpsertAudioFile")]
         public IActionResult UpsertAudioFile(AudioFile audioFileToUpsert)
         {
