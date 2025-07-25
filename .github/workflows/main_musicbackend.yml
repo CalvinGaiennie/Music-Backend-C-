@@ -29,14 +29,11 @@ jobs:
       - name: Build with dotnet
         run: dotnet build Music-Backend-CSharp.csproj --configuration Release
 
-      - name: dotnet publish
-        run: dotnet publish Music-Backend-CSharp.csproj --configuration Release --output ./publish
-
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ./publish
+          path: .
 
   deploy:
     runs-on: ubuntu-latest
