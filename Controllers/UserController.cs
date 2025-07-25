@@ -15,7 +15,19 @@ public class UserController : ControllerBase
         _dapper = new DataContextDapper(config);
     }
     [HttpGet("TestConnection")]
-    public DateTime TestConnection()
+    public IActionResult TestConnection()
+    {
+        return Ok(new
+        {
+            success = true,
+            message = "API is running successfully!",
+            timestamp = DateTime.UtcNow,
+            environment = "Azure"
+        });
+    }
+
+    [HttpGet("TestDatabase")]
+    public DateTime TestDatabase()
     {
         return _dapper.LoadDataSingleWithParameters<DateTime>("SELECT GETDATE()", new DynamicParameters());
     }
