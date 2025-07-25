@@ -7,15 +7,15 @@ public class AudioTrack
 {
     public int AudioTrackId { get; set; }
     public int UserId { get; set; }
-    public string SongName { get; set; }
-    public string SongTip { get; set; }
-    public string SongKey { get; set; }
-    public string SongChords { get; set; }
-    public string SongInstrument { get; set; }
-    public string SongDifficulty { get; set; }
+    public string SongName { get; set; } = string.Empty;
+    public string SongTip { get; set; } = string.Empty;
+    public string SongKey { get; set; } = string.Empty;
+    public string SongChords { get; set; } = string.Empty;
+    public string SongInstrument { get; set; } = string.Empty;
+    public string SongDifficulty { get; set; } = string.Empty;
 
     [JsonConverter(typeof(Base64ByteArrayConverter))]
-    public byte[] SongData { get; set; }
+    public byte[] SongData { get; set; } = Array.Empty<byte>();
 
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
@@ -27,9 +27,9 @@ public class Base64ByteArrayConverter : JsonConverter<byte[]>
     {
         if (reader.TokenType == JsonTokenType.String)
         {
-            string base64String = reader.GetString();
+            string? base64String = reader.GetString();
             if (string.IsNullOrEmpty(base64String))
-                return new byte[0];
+                return Array.Empty<byte>();
 
             try
             {
