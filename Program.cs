@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
     });
     options.AddPolicy("ProdCors", (corsBuilder) =>
     {
-        corsBuilder.WithOrigins("https://myProductionSite.com")
+        corsBuilder.WithOrigins("https://cgmusic.netlify.app/", "http://localhost:4200", "http://localhost:5173")
                    .AllowAnyMethod()
                    .AllowAnyHeader()
                    .AllowCredentials();
