@@ -102,7 +102,7 @@ namespace Music.Controllers
         [HttpDelete("DeleteAudioTrack/{audioTrackId}")]
         public IActionResult DeleteAudioTrack(int audioTrackId)
         {
-            string sql = @"EXEC dbo.spAudioTrack_Delete @AudioTrackId = @AudioTrackIdParameter, @UserId = @UserIdParameter";
+            string sql = @"EXEC dbo.spAudioTracks_Delete @AudioTrackId = @AudioTrackIdParameter, @UserId = @UserIdParameter";
 
             DynamicParameters sqlParameters = new DynamicParameters();
             sqlParameters.Add("@AudioTrackIdParameter", audioTrackId, DbType.Int32);
