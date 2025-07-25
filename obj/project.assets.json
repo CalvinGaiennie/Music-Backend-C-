@@ -2311,9 +2311,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/Music-Backend-C#.csproj",
-      "projectName": "Music-Backend-C#",
-      "projectPath": "/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/Music-Backend-C#.csproj",
+      "projectUniqueName": "/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/Music-Backend-CSharp.csproj",
+      "projectName": "Music-Backend-CSharp",
+      "projectPath": "/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/Music-Backend-CSharp.csproj",
       "packagesPath": "/Users/calvingaiennie/.nuget/packages/",
       "outputPath": "/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/obj/",
       "projectStyle": "PackageReference",

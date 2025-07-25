@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "+iN9IL/G0dk=",
+  "dgSpecHash": "r/mAEZ62wcg=",
   "success": true,
-  "projectFilePath": "/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/Music-Backend-C#.csproj",
+  "projectFilePath": "/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/Music-Backend-CSharp.csproj",
   "expectedPackageFiles": [
     "/Users/calvingaiennie/.nuget/packages/azure.core/1.35.0/azure.core.1.35.0.nupkg.sha512",
     "/Users/calvingaiennie/.nuget/packages/azure.identity/1.10.3/azure.identity.1.10.3.nupkg.sha512",
