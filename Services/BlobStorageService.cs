@@ -11,6 +11,21 @@ public class BlobStorageService : IBlobStorageService
     public BlobStorageService(IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("AzureBlobStorage");
+
+        // Handle environment variable substitution manually
+        if (connectionString != null)
+        {
+            var accountName = Environment.GetEnvironmentVariable("AZURE_STORAGE_ACCOUNT_NAME");
+            var accountKey = Environment.GetEnvironmentVariable("AZURE_STORAGE_ACCOUNT_KEY");
+
+            if (!string.IsNullOrEmpty(accountName) && !string.IsNullOrEmpty(accountKey))
+            {
+                connectionString = connectionString
+                    .Replace("${AZURE_STORAGE_ACCOUNT_NAME}", accountName)
+                    .Replace("${AZURE_STORAGE_ACCOUNT_KEY}", accountKey);
+            }
+        }
+
         _blobServiceClient = new BlobServiceClient(connectionString);
         _containerName = configuration.GetSection("BlobStorage:ContainerName").Value ?? "cgmusicblobs";
     }
