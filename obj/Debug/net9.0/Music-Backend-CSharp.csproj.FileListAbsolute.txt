@@ -70,3 +70,9 @@
 /Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/obj/Debug/net9.0/Music-Backend-CSharp.pdb
 /Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/obj/Debug/net9.0/Music-Backend-CSharp.genruntimeconfig.cache
 /Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/obj/Debug/net9.0/ref/Music-Backend-CSharp.dll
+/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/bin/Debug/net9.0/Azure.Storage.Blobs.dll
+/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/bin/Debug/net9.0/Azure.Storage.Common.dll
+/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/bin/Debug/net9.0/DotNetEnv.dll
+/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/bin/Debug/net9.0/Sprache.dll
+/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/bin/Debug/net9.0/System.ClientModel.dll
+/Users/calvingaiennie/Documents/GitHub/Music-Backend-C#/bin/Debug/net9.0/System.IO.Hashing.dll

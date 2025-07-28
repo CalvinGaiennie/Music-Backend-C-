@@ -44,9 +44,17 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "Azure.Storage.Blobs": {
+              "target": "Package",
+              "version": "[12.25.0, )"
+            },
             "Dapper": {
               "target": "Package",
               "version": "[2.1.66, )"
+            },
+            "DotNetEnv": {
+              "target": "Package",
+              "version": "[2.6.0, )"
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
