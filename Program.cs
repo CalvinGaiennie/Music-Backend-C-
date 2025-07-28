@@ -62,6 +62,9 @@ else
     app.UseHttpsRedirection();
 }
 
+// Force CORS to always be applied regardless of environment detection
+app.UseCors("ProdCors");
+
 app.UseAuthentication();
 
 app.UseAuthorization();
