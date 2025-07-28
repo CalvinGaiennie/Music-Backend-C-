@@ -66,49 +66,6 @@ namespace Music.Controllers
             return _dapper.LoadDataWithParameters<AudioTrack>(sql, sqlParameters);
         }
 
-        [HttpGet("GetAudioTracksList/{trackId}/{userId}/{searchParam}")]
-        public IEnumerable<AudioTrackListDto> GetAudioTracksList(int trackId = 0, int userId = 0, string searchParam = "None")
-        {
-            string sql = @"EXEC dbo.spAudioTracks_GetList";
-            string stringParameters = "";
-            DynamicParameters sqlParameters = new DynamicParameters();
-
-            if (trackId != 0)
-            {
-                stringParameters += ", @AudioTrackId = @AudioTrackIdParameter";
-                sqlParameters.Add("@AudioTrackIdParameter", trackId, DbType.Int32);
-            }
-
-            if (userId != 0)
-            {
-                stringParameters += ", @UserId = @UserIdParameter";
-                sqlParameters.Add("@UserIdParameter", userId, DbType.Int32);
-            }
-
-            if (searchParam != "None" && searchParam.ToLower() != "none")
-            {
-                stringParameters += ", @SearchValue = @SearchValueParameter";
-                sqlParameters.Add("@SearchValueParameter", searchParam, DbType.String);
-            }
-
-            if (stringParameters.Length > 0)
-            {
-                sql += stringParameters.Substring(1);
-            }
-
-            return _dapper.LoadDataWithParameters<AudioTrackListDto>(sql, sqlParameters);
-        }
-
-        [HttpGet("GetMyAudioTracksList")]
-        public IEnumerable<AudioTrackListDto> GetMyAudioTracksList()
-        {
-            string sql = @"EXEC dbo.spAudioTracks_GetList @UserId = @UserIdParameter";
-            DynamicParameters sqlParameters = new DynamicParameters();
-            sqlParameters.Add("@UserIdParameter", this.User.FindFirst("userId")?.Value, DbType.Int32);
-
-            return _dapper.LoadDataWithParameters<AudioTrackListDto>(sql, sqlParameters);
-        }
-
         [HttpPut("UpsertAudioTrack")]
         public async Task<IActionResult> UpsertAudioTrack(AudioTrackUpsertRequest request)
         {
