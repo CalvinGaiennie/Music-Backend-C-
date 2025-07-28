@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Music.Data;
 using Music.Models;
 using Music.Dtos;
+using Music.Services;
 
 namespace Music.Controllers
 {
@@ -14,10 +15,12 @@ namespace Music.Controllers
     public class AudioTrackController : ControllerBase
     {
         private readonly DataContextDapper _dapper;
+        private readonly IBlobStorageService _blobStorageService;
 
-        public AudioTrackController(IConfiguration config)
+        public AudioTrackController(IConfiguration config, IBlobStorageService blobStorageService)
         {
             _dapper = new DataContextDapper(config);
+            _blobStorageService = blobStorageService;
         }
 
         [HttpGet("GetAudioTracks/{trackId}/{userId}/{searchParam}")]
@@ -107,44 +110,60 @@ namespace Music.Controllers
         }
 
         [HttpPut("UpsertAudioTrack")]
-        public IActionResult UpsertAudioTrack(AudioTrack audioTrackToUpsert)
+        public async Task<IActionResult> UpsertAudioTrack(AudioTrackUpsertRequest request)
         {
-            string sql = @"EXEC dbo.spAudioTracks_Upsert
-            @UserId = @UserIdParameter,
-            @SongName = @SongNameParameter,
-            @SongTip = @SongTipParameter,
-            @SongKey = @SongKeyParameter,
-            @SongChords = @SongChordsParameter,
-            @SongInstrument = @SongInstrumentParameter,
-            @SongDifficulty = @SongDifficultyParameter,
-            @SongData = @SongDataParameter";
-
-            DynamicParameters sqlParameters = new DynamicParameters();
-            sqlParameters.Add("@UserIdParameter", this.User.FindFirst("userId")?.Value, DbType.Int32);
-            sqlParameters.Add("@SongNameParameter", audioTrackToUpsert.SongName, DbType.String);
-            sqlParameters.Add("@SongTipParameter", audioTrackToUpsert.SongTip, DbType.String);
-            sqlParameters.Add("@SongKeyParameter", audioTrackToUpsert.SongKey, DbType.String);
-            sqlParameters.Add("@SongChordsParameter", audioTrackToUpsert.SongChords, DbType.String);
-            sqlParameters.Add("@SongInstrumentParameter", audioTrackToUpsert.SongInstrument, DbType.String);
-            sqlParameters.Add("@SongDifficultyParameter", audioTrackToUpsert.SongDifficulty, DbType.String);
-            sqlParameters.Add("@SongDataParameter", audioTrackToUpsert.SongData, DbType.Binary);
-
-            if (audioTrackToUpsert.AudioTrackId > 0)
+            try
             {
-                sql += ", @AudioTrackId = @AudioTrackIdParameter";
-                sqlParameters.Add("@AudioTrackIdParameter", audioTrackToUpsert.AudioTrackId, DbType.Int32);
-            }
+                string blobUrl = string.Empty;
 
-            if (_dapper.ExecuteSqlWithParameters(sql, sqlParameters))
+                // Upload audio file to blob storage if provided
+                if (request.SongData != null && request.SongData.Length > 0)
+                {
+                    var fileName = $"{request.SongName}_{DateTime.UtcNow:yyyyMMddHHmmss}.mp3";
+                    blobUrl = await _blobStorageService.UploadAudioFileAsync(fileName, request.SongData);
+                }
+
+                string sql = @"EXEC dbo.spAudioTracks_Upsert
+                @UserId = @UserIdParameter,
+                @SongName = @SongNameParameter,
+                @SongTip = @SongTipParameter,
+                @SongKey = @SongKeyParameter,
+                @SongChords = @SongChordsParameter,
+                @SongInstrument = @SongInstrumentParameter,
+                @SongDifficulty = @SongDifficultyParameter,
+                @SongBlobUrl = @SongBlobUrlParameter";
+
+                DynamicParameters sqlParameters = new DynamicParameters();
+                sqlParameters.Add("@UserIdParameter", this.User.FindFirst("userId")?.Value, DbType.Int32);
+                sqlParameters.Add("@SongNameParameter", request.SongName, DbType.String);
+                sqlParameters.Add("@SongTipParameter", request.SongTip, DbType.String);
+                sqlParameters.Add("@SongKeyParameter", request.SongKey, DbType.String);
+                sqlParameters.Add("@SongChordsParameter", request.SongChords, DbType.String);
+                sqlParameters.Add("@SongInstrumentParameter", request.SongInstrument, DbType.String);
+                sqlParameters.Add("@SongDifficultyParameter", request.SongDifficulty, DbType.String);
+                sqlParameters.Add("@SongBlobUrlParameter", blobUrl, DbType.String);
+
+                if (request.AudioTrackId > 0)
+                {
+                    sql += ", @AudioTrackId = @AudioTrackIdParameter";
+                    sqlParameters.Add("@AudioTrackIdParameter", request.AudioTrackId, DbType.Int32);
+                }
+
+                if (_dapper.ExecuteSqlWithParameters(sql, sqlParameters))
+                {
+                    return Ok(new { message = "Audio track saved successfully", blobUrl });
+                }
+
+                throw new Exception("Failed to upsert audio track");
+            }
+            catch (Exception ex)
             {
-                return Ok();
+                return BadRequest(new { message = "Failed to save audio track", error = ex.Message });
             }
-
-            throw new Exception("Failed to upsert audio track");
         }
 
         [HttpDelete("DeleteAudioTrack/{audioTrackId}")]
-        public IActionResult DeleteAudioTrack(int audioTrackId)
+        public async Task<IActionResult> DeleteAudioTrack(int audioTrackId)
         {
             var currentUserId = this.User.FindFirst("userId")?.Value;
             Console.WriteLine($"[DELETE] Attempting to delete AudioTrack {audioTrackId} by User {currentUserId}");
@@ -152,25 +171,48 @@ namespace Music.Controllers
             if (string.IsNullOrEmpty(currentUserId))
             {
                 Console.WriteLine($"[DELETE] ERROR: No userId found in token for AudioTrack {audioTrackId}");
+                return Unauthorized("User not authenticated");
             }
 
-            string sql = @"EXEC dbo.spAudioTracks_Delete @AudioTrackId = @AudioTrackIdParameter, @UserId = @UserIdParameter";
-
-            DynamicParameters sqlParameters = new DynamicParameters();
-            sqlParameters.Add("@AudioTrackIdParameter", audioTrackId, DbType.Int32);
-            sqlParameters.Add("@UserIdParameter", this.User.FindFirst("userId")?.Value, DbType.Int32);
-
-            Console.WriteLine($"[DELETE] Executing SQL: {sql} with AudioTrackId={audioTrackId}, UserId={currentUserId}");
-
-            if (_dapper.ExecuteSqlWithParameters(sql, sqlParameters))
+            try
             {
-                Console.WriteLine($"[DELETE] SUCCESS: AudioTrack {audioTrackId} deleted by User {currentUserId}");
-                return Ok();
-            }
+                // First, get the blob URL from the database
+                string getSql = @"EXEC dbo.spAudioTracks_Get @AudioTrackId = @AudioTrackIdParameter";
+                DynamicParameters getParameters = new DynamicParameters();
+                getParameters.Add("@AudioTrackIdParameter", audioTrackId, DbType.Int32);
 
-            Console.WriteLine($"[DELETE] FAILED: AudioTrack {audioTrackId} not deleted by User {currentUserId}");
-            Console.WriteLine($"[DELETE] Possible reasons: Track doesn't exist, User doesn't own track, or database error");
-            throw new Exception("Failed to delete audio track");
+                var audioTrack = _dapper.LoadDataWithParameters<AudioTrack>(getSql, getParameters).FirstOrDefault();
+
+                // Delete from database
+                string deleteSql = @"EXEC dbo.spAudioTracks_Delete @AudioTrackId = @AudioTrackIdParameter, @UserId = @UserIdParameter";
+                DynamicParameters deleteParameters = new DynamicParameters();
+                deleteParameters.Add("@AudioTrackIdParameter", audioTrackId, DbType.Int32);
+                deleteParameters.Add("@UserIdParameter", currentUserId, DbType.Int32);
+
+                Console.WriteLine($"[DELETE] Executing SQL: {deleteSql} with AudioTrackId={audioTrackId}, UserId={currentUserId}");
+
+                if (_dapper.ExecuteSqlWithParameters(deleteSql, deleteParameters))
+                {
+                    // Delete from blob storage if URL exists
+                    if (audioTrack != null && !string.IsNullOrEmpty(audioTrack.SongBlobUrl))
+                    {
+                        await _blobStorageService.DeleteAudioFileAsync(audioTrack.SongBlobUrl);
+                        Console.WriteLine($"[DELETE] Blob deleted: {audioTrack.SongBlobUrl}");
+                    }
+
+                    Console.WriteLine($"[DELETE] SUCCESS: AudioTrack {audioTrackId} deleted by User {currentUserId}");
+                    return Ok(new { message = "Audio track deleted successfully" });
+                }
+
+                Console.WriteLine($"[DELETE] FAILED: AudioTrack {audioTrackId} not deleted by User {currentUserId}");
+                Console.WriteLine($"[DELETE] Possible reasons: Track doesn't exist, User doesn't own track, or database error");
+                return BadRequest(new { message = "Failed to delete audio track" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DELETE] EXCEPTION: {ex.Message}");
+                return BadRequest(new { message = "Error deleting audio track", error = ex.Message });
+            }
         }
     }
 }

@@ -1,6 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
 namespace Music.Models;
 
 public class AudioTrack
@@ -13,46 +10,7 @@ public class AudioTrack
     public string SongChords { get; set; } = string.Empty;
     public string SongInstrument { get; set; } = string.Empty;
     public string SongDifficulty { get; set; } = string.Empty;
-
-    [JsonConverter(typeof(Base64ByteArrayConverter))]
-    public byte[] SongData { get; set; } = Array.Empty<byte>();
-
+    public string SongBlobUrl { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-}
-
-public class Base64ByteArrayConverter : JsonConverter<byte[]>
-{
-    public override byte[] Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        if (reader.TokenType == JsonTokenType.String)
-        {
-            string? base64String = reader.GetString();
-            if (string.IsNullOrEmpty(base64String))
-                return Array.Empty<byte>();
-
-            try
-            {
-                return Convert.FromBase64String(base64String);
-            }
-            catch (FormatException)
-            {
-                throw new JsonException("Invalid Base64 string format");
-            }
-        }
-
-        throw new JsonException("Expected string for byte array");
-    }
-
-    public override void Write(Utf8JsonWriter writer, byte[] value, JsonSerializerOptions options)
-    {
-        if (value == null || value.Length == 0)
-        {
-            writer.WriteStringValue("");
-        }
-        else
-        {
-            writer.WriteStringValue(Convert.ToBase64String(value));
-        }
-    }
 }
