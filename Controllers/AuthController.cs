@@ -129,7 +129,7 @@ namespace Music.Controllers
             try
             {
                 string sqlForHashAndSalt = @"EXEC dbo.spLoginConfirmation_Get 
-                @Email = @EmailParam";
+            @Email = @EmailParam";
 
                 DynamicParameters sqlParameters = new DynamicParameters();
                 sqlParameters.Add("@EmailParam", userForLogin.Email, DbType.String);
