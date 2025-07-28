@@ -26,6 +26,8 @@ namespace Music.Controllers
         [HttpGet("GetAudioTracks/{trackId}/{userId}/{searchParam}")]
         public IEnumerable<AudioTrack> GetAudioTracks(int trackId = 0, int userId = 0, string searchParam = "None")
         {
+            Console.WriteLine($"[GET] GetAudioTracks called with trackId={trackId}, userId={userId}, searchParam='{searchParam}'");
+
             string sql = @"EXEC dbo.spAudioTracks_Get";
             string stringParameters = "";
             DynamicParameters sqlParameters = new DynamicParameters();
@@ -53,17 +55,38 @@ namespace Music.Controllers
                 sql += stringParameters.Substring(1);
             }
 
-            return _dapper.LoadDataWithParameters<AudioTrack>(sql, sqlParameters);
+            Console.WriteLine($"[GET] Executing SQL: {sql}");
+            var results = _dapper.LoadDataWithParameters<AudioTrack>(sql, sqlParameters);
+
+            Console.WriteLine($"[GET] Found {results.Count()} tracks");
+            foreach (var track in results)
+            {
+                Console.WriteLine($"[GET] Track {track.AudioTrackId}: '{track.SongName}' - BlobUrl: '{track.SongBlobUrl}'");
+            }
+
+            return results;
         }
 
         [HttpGet("GetMyAudioTracks")]
         public IEnumerable<AudioTrack> GetMyAudioTracks()
         {
+            var userId = this.User.FindFirst("userId")?.Value;
+            Console.WriteLine($"[GET] GetMyAudioTracks called for userId: {userId}");
+
             string sql = @"EXEC dbo.spAudioTracks_Get @UserId = @UserIdParameter";
             DynamicParameters sqlParameters = new DynamicParameters();
-            sqlParameters.Add("@UserIdParameter", this.User.FindFirst("userId")?.Value, DbType.Int32);
+            sqlParameters.Add("@UserIdParameter", userId, DbType.Int32);
 
-            return _dapper.LoadDataWithParameters<AudioTrack>(sql, sqlParameters);
+            Console.WriteLine($"[GET] Executing SQL: {sql}");
+            var results = _dapper.LoadDataWithParameters<AudioTrack>(sql, sqlParameters);
+
+            Console.WriteLine($"[GET] Found {results.Count()} tracks for user {userId}");
+            foreach (var track in results)
+            {
+                Console.WriteLine($"[GET] Track {track.AudioTrackId}: '{track.SongName}' - BlobUrl: '{track.SongBlobUrl}'");
+            }
+
+            return results;
         }
 
         [HttpPut("UpsertAudioTrack")]
@@ -72,12 +95,20 @@ namespace Music.Controllers
             try
             {
                 string blobUrl = string.Empty;
+                Console.WriteLine($"[UPSERT] Starting upsert for song: {request.SongName}");
+                Console.WriteLine($"[UPSERT] SongData length: {request.SongData?.Length ?? 0}");
 
                 // Upload audio file to blob storage if provided
                 if (request.SongData != null && request.SongData.Length > 0)
                 {
                     var fileName = $"{request.SongName}_{DateTime.UtcNow:yyyyMMddHHmmss}.mp3";
+                    Console.WriteLine($"[UPSERT] Uploading to blob storage with filename: {fileName}");
                     blobUrl = await _blobStorageService.UploadAudioFileAsync(fileName, request.SongData);
+                    Console.WriteLine($"[UPSERT] Blob URL generated: {blobUrl}");
+                }
+                else
+                {
+                    Console.WriteLine($"[UPSERT] No SongData provided, blobUrl will be empty");
                 }
 
                 string sql = @"EXEC dbo.spAudioTracks_Upsert
@@ -100,21 +131,31 @@ namespace Music.Controllers
                 sqlParameters.Add("@SongDifficultyParameter", request.SongDifficulty, DbType.String);
                 sqlParameters.Add("@SongBlobUrlParameter", blobUrl, DbType.String);
 
+                Console.WriteLine($"[UPSERT] About to save to DB with blobUrl: '{blobUrl}'");
+
                 if (request.AudioTrackId > 0)
                 {
                     sql += ", @AudioTrackId = @AudioTrackIdParameter";
                     sqlParameters.Add("@AudioTrackIdParameter", request.AudioTrackId, DbType.Int32);
+                    Console.WriteLine($"[UPSERT] Updating existing track ID: {request.AudioTrackId}");
+                }
+                else
+                {
+                    Console.WriteLine($"[UPSERT] Creating new track");
                 }
 
                 if (_dapper.ExecuteSqlWithParameters(sql, sqlParameters))
                 {
+                    Console.WriteLine($"[UPSERT] SUCCESS: Track saved with blobUrl: '{blobUrl}'");
                     return Ok(new { message = "Audio track saved successfully", blobUrl });
                 }
 
+                Console.WriteLine($"[UPSERT] FAILED: Database operation returned false");
                 throw new Exception("Failed to upsert audio track");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[UPSERT] EXCEPTION: {ex.Message}");
                 return BadRequest(new { message = "Failed to save audio track", error = ex.Message });
             }
         }
