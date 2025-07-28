@@ -2,7 +2,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE   PROCEDURE [dbo].[spAudioTrack_Delete]
+CREATE   PROCEDURE [dbo].[spAudioTracks_Delete]
     @AudioTrackId INT
     , @UserId INT 
 AS
