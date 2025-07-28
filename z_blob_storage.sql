@@ -54,33 +54,7 @@ BEGIN
 END
 GO
 
--- 4. GetList procedure (no changes needed - already excludes SongData)
-CREATE OR ALTER PROCEDURE [dbo].[spAudioTracks_GetList]
-/*EXEC dbo.spAudioTracks_GetList @UserId = 1003, @SearchValue='Second'*/
-/*EXEC dbo.spAudioTracks_GetList @AudioTrackId = 2*/
-    @UserId INT = NULL
-    , @SearchValue NVARCHAR(MAX) = NULL
-    , @AudioTrackId INT = NULL
-AS
-BEGIN
-    SELECT 
-        AudioTrackId,
-        UserId,
-        SongName,
-        SongTip,
-        SongKey,
-        SongChords,
-        SongInstrument,
-        SongDifficulty,
-        CreatedAt,
-        UpdatedAt
-    FROM dbo.AudioTracks AS AudioTracks
-        WHERE AudioTracks.UserId = ISNULL(@UserId, AudioTracks.UserId)
-            AND AudioTracks.AudioTrackId = ISNULL(@AudioTrackId, AudioTracks.AudioTrackId)
-            AND (@SearchValue IS NULL
-                OR AudioTracks.SongName LIKE '%' + @SearchValue + '%')
-END
-GO
+-- 4. GetList procedure removed - all endpoints now return full data including blob URL
 
 -- 5. Updated Upsert procedure (handles blob URL instead of binary data)
 SET ANSI_NULLS ON
