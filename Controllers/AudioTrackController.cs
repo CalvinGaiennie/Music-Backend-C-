@@ -146,16 +146,30 @@ namespace Music.Controllers
         [HttpDelete("DeleteAudioTrack/{audioTrackId}")]
         public IActionResult DeleteAudioTrack(int audioTrackId)
         {
+            var currentUserId = this.User.FindFirst("userId")?.Value;
+            Console.WriteLine($"[DELETE] Attempting to delete AudioTrack {audioTrackId} by User {currentUserId}");
+
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                Console.WriteLine($"[DELETE] ERROR: No userId found in token for AudioTrack {audioTrackId}");
+            }
+
             string sql = @"EXEC dbo.spAudioTracks_Delete @AudioTrackId = @AudioTrackIdParameter, @UserId = @UserIdParameter";
 
             DynamicParameters sqlParameters = new DynamicParameters();
             sqlParameters.Add("@AudioTrackIdParameter", audioTrackId, DbType.Int32);
             sqlParameters.Add("@UserIdParameter", this.User.FindFirst("userId")?.Value, DbType.Int32);
 
+            Console.WriteLine($"[DELETE] Executing SQL: {sql} with AudioTrackId={audioTrackId}, UserId={currentUserId}");
+
             if (_dapper.ExecuteSqlWithParameters(sql, sqlParameters))
             {
+                Console.WriteLine($"[DELETE] SUCCESS: AudioTrack {audioTrackId} deleted by User {currentUserId}");
                 return Ok();
             }
+
+            Console.WriteLine($"[DELETE] FAILED: AudioTrack {audioTrackId} not deleted by User {currentUserId}");
+            Console.WriteLine($"[DELETE] Possible reasons: Track doesn't exist, User doesn't own track, or database error");
             throw new Exception("Failed to delete audio track");
         }
     }
