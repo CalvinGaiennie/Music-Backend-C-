@@ -15,6 +15,7 @@ public class AudioTrackUpsertRequest
     public string SongArtist { get; set; } = string.Empty;
     public string SongAlbum { get; set; } = string.Empty;
     public string SongLength { get; set; } = string.Empty;
+    public string RecordingQuality { get; set; } = string.Empty;
 
 
     [JsonConverter(typeof(Base64ByteArrayConverter))]

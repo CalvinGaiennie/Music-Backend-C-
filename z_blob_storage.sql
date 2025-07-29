@@ -8,6 +8,7 @@
 -- ALTER TABLE dbo.AudioTracks ADD SongArtist NVARCHAR(255);
 -- ALTER TABLE dbo.AudioTracks ADD SongAlbum NVARCHAR(255);
 -- ALTER TABLE dbo.AudioTracks ADD SongLength NVARCHAR(50);
+-- ALTER TABLE dbo.AudioTracks ADD RecordingQuality NVARCHAR(50);
 
 -- 2. Updated Delete procedure (no changes needed)
 SET ANSI_NULLS ON
@@ -50,6 +51,7 @@ BEGIN
         SongArtist,
         SongAlbum,
         SongLength,
+        RecordingQuality,
         SongBlobUrl,
         CreatedAt,
         UpdatedAt
@@ -82,6 +84,7 @@ CREATE OR ALTER PROCEDURE [dbo].[spAudioTracks_Upsert]
     , @SongArtist NVARCHAR(255)
     , @SongAlbum NVARCHAR(255)
     , @SongLength NVARCHAR(50)
+    , @RecordingQuality NVARCHAR(50)
     , @SongBlobUrl NVARCHAR(500)
 AS
 BEGIN
@@ -98,6 +101,7 @@ BEGIN
                 [SongArtist],
                 [SongAlbum],
                 [SongLength],
+                [RecordingQuality],
                 [SongBlobUrl],
                 [CreatedAt],
                 [UpdatedAt]
@@ -112,6 +116,7 @@ BEGIN
                 @SongArtist,
                 @SongAlbum,
                 @SongLength,
+                @RecordingQuality,
                 @SongBlobUrl,
                 GETDATE(),
                 GETDATE()
@@ -129,6 +134,7 @@ BEGIN
                     SongArtist = @SongArtist,
                     SongAlbum = @SongAlbum,
                     SongLength = @SongLength,
+                    RecordingQuality = @RecordingQuality,
                     SongBlobUrl = @SongBlobUrl,
                     UpdatedAt = GETDATE()
                 WHERE AudioTrackId = @AudioTrackId

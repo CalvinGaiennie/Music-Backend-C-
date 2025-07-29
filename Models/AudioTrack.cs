@@ -13,6 +13,7 @@ public class AudioTrack
     public string SongArtist { get; set; } = string.Empty;
     public string SongAlbum { get; set; } = string.Empty;
     public string SongLength { get; set; } = string.Empty;
+    public string RecordingQuality { get; set; } = string.Empty;
     public string SongBlobUrl { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

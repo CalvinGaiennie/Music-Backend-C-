@@ -122,6 +122,7 @@ namespace Music.Controllers
                 @SongArtist = @SongArtistParameter,
                 @SongAlbum = @SongAlbumParameter,
                 @SongLength = @SongLengthParameter,
+                @RecordingQuality = @RecordingQualityParameter,
                 @SongBlobUrl = @SongBlobUrlParameter";
 
                 DynamicParameters sqlParameters = new DynamicParameters();
@@ -135,6 +136,7 @@ namespace Music.Controllers
                 sqlParameters.Add("@SongArtistParameter", request.SongArtist, DbType.String);
                 sqlParameters.Add("@SongAlbumParameter", request.SongAlbum, DbType.String);
                 sqlParameters.Add("@SongLengthParameter", request.SongLength, DbType.String);
+                sqlParameters.Add("@RecordingQualityParameter", request.RecordingQuality, DbType.String);
                 sqlParameters.Add("@SongBlobUrlParameter", blobUrl, DbType.String);
 
                 Console.WriteLine($"[UPSERT] About to save to DB with blobUrl: '{blobUrl}'");
