@@ -12,6 +12,10 @@ public class AudioTrackUpsertRequest
     public string SongChords { get; set; } = string.Empty;
     public string SongInstrument { get; set; } = string.Empty;
     public string SongDifficulty { get; set; } = string.Empty;
+    public string SongArtist { get; set; } = string.Empty;
+    public string SongAlbum { get; set; } = string.Empty;
+    public string SongLength { get; set; } = string.Empty;
+
 
     [JsonConverter(typeof(Base64ByteArrayConverter))]
     public byte[] SongData { get; set; } = Array.Empty<byte>();

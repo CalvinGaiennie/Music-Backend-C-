@@ -10,6 +10,9 @@ public class AudioTrack
     public string SongChords { get; set; } = string.Empty;
     public string SongInstrument { get; set; } = string.Empty;
     public string SongDifficulty { get; set; } = string.Empty;
+    public string SongArtist { get; set; } = string.Empty;
+    public string SongAlbum { get; set; } = string.Empty;
+    public string SongLength { get; set; } = string.Empty;
     public string SongBlobUrl { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
