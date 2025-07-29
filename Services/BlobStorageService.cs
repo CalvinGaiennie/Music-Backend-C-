@@ -58,7 +58,21 @@ public class BlobStorageService : IBlobStorageService
     {
         try
         {
-            var blobClient = new BlobClient(new Uri(blobUrl));
+            // Parse the blob URL to get container name and blob name
+            var uri = new Uri(blobUrl);
+            var pathSegments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            if (pathSegments.Length < 2)
+            {
+                throw new Exception("Invalid blob URL format");
+            }
+
+            var containerName = pathSegments[0];
+            var blobName = string.Join("/", pathSegments.Skip(1));
+
+            // Get the container and blob client using the authenticated service client
+            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+            var blobClient = containerClient.GetBlobClient(blobName);
 
             var response = await blobClient.DownloadAsync();
             using var stream = new MemoryStream();
@@ -76,7 +90,22 @@ public class BlobStorageService : IBlobStorageService
     {
         try
         {
-            var blobClient = new BlobClient(new Uri(blobUrl));
+            // Parse the blob URL to get container name and blob name
+            var uri = new Uri(blobUrl);
+            var pathSegments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            if (pathSegments.Length < 2)
+            {
+                throw new Exception("Invalid blob URL format");
+            }
+
+            var containerName = pathSegments[0];
+            var blobName = string.Join("/", pathSegments.Skip(1));
+
+            // Get the container and blob client using the authenticated service client
+            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+            var blobClient = containerClient.GetBlobClient(blobName);
+
             await blobClient.DeleteIfExistsAsync();
         }
         catch (Exception ex)
@@ -89,7 +118,22 @@ public class BlobStorageService : IBlobStorageService
     {
         try
         {
-            var blobClient = new BlobClient(new Uri(blobUrl));
+            // Parse the blob URL to get container name and blob name
+            var uri = new Uri(blobUrl);
+            var pathSegments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            if (pathSegments.Length < 2)
+            {
+                return false;
+            }
+
+            var containerName = pathSegments[0];
+            var blobName = string.Join("/", pathSegments.Skip(1));
+
+            // Get the container and blob client using the authenticated service client
+            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+            var blobClient = containerClient.GetBlobClient(blobName);
+
             var response = await blobClient.ExistsAsync();
             return response.Value;
         }
